@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote & Compare</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f8f9ff 0%, #e8ecf7 30%, #f0f4f8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #2c3e50;
+            letter-spacing: -0.01em;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 32px;
+            box-shadow: 0 32px 64px rgba(44, 62, 80, 0.08), 0 16px 32px rgba(44, 62, 80, 0.04);
+            padding: 60px 50px;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        .question {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 50px;
+            padding: 0 20px;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+
+        .question::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            border-radius: 1px;
+        }
+
+        .pictures-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .picture-wrapper {
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .picture-wrapper:hover {
+            transform: translateY(-8px);
+        }
+
+        .picture {
+            width: 100%;
+            height: 320px;
+            background: #f8f9fa;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.1);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 40px rgba(44, 62, 80, 0.08);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .picture:hover {
+            box-shadow: 0 20px 60px rgba(44, 62, 80, 0.15);
+        }
+
+        .picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .picture:hover img {
+            transform: scale(1.02);
+        }
+
+        .picture-label {
+            position: absolute;
+            bottom: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .voting-section {
+            margin-top: 60px;
+        }
+
+        .vote-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .vote-btn {
+            padding: 18px 48px;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 32px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-width: 140px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+
+        .vote-left {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            box-shadow: 0 12px 32px rgba(232, 67, 147, 0.25);
+        }
+
+        .vote-right {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            box-shadow: 0 12px 32px rgba(0, 184, 148, 0.25);
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+
+        .vote-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            margin-top: 32px;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.06);
+        }
+
+        .results h3 {
+            font-weight: 400;
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        .result-bar {
+            height: 12px;
+            background: rgba(44, 62, 80, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .result-fill {
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 8px;
+        }
+
+        .result-left {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        }
+
+        .result-right {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .result-text {
+            position: absolute;
+            top: -28px;
+            right: 0;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.85rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .new-round-btn {
+            margin-top: 40px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            border: none;
+            border-radius: 32px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 12px 32px rgba(108, 92, 231, 0.25);
+            letter-spacing: 0.01em;
+        }
+
+        .new-round-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 48px rgba(108, 92, 231, 0.35);
+        }
+
+        .total-votes {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        @media (max-width: 600px) {
+            .pictures-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .question {
+                font-size: 1.5rem;
+            }
+            
+            .vote-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="question" id="question">Loading question...</div>
+        
+        <div class="pictures-container">
+            <div class="picture-wrapper">
+                <div class="picture" id="picture1">
+                    <img id="img1" src="" alt="Picture 1" style="display: none;">
+                    <span id="placeholder1">Loading...</span>
+                </div>
+                <div class="picture-label">Left</div>
+            </div>
+            
+            <div class="picture-wrapper">
+                <div class="picture" id="picture2">
+                    <img id="img2" src="" alt="Picture 2" style="display: none;">
+                    <span id="placeholder2">Loading...</span>
+                </div>
+                <div class="picture-label">Right</div>
+            </div>
+        </div>
+        
+        <div class="voting-section">
+            <div class="vote-buttons">
+                <button class="vote-btn vote-left" onclick="vote('left')">Vote Left</button>
+                <button class="vote-btn vote-right" onclick="vote('right')">Vote Right</button>
+            </div>
+            
+            <div class="results" id="results" style="display: none;">
+                <h3>Results</h3>
+                <div class="result-item">
+                    <span class="result-label">Left: <span id="leftCount">0</span> votes</span>
+                    <div class="result-bar" style="width: 200px; position: relative;">
+                        <div class="result-fill result-left" id="leftBar"></div>
+                        <div class="result-text" id="leftPercent">0%</div>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Right: <span id="rightCount">0</span> votes</span>
+                    <div class="result-bar" style="width: 200px; position: relative;">
+                        <div class="result-fill result-right" id="rightBar"></div>
+                        <div class="result-text" id="rightPercent">0%</div>
+                    </div>
+                </div>
+                <div class="total-votes">Total votes: <span id="totalVotes">0</span></div>
+            </div>
+            
+            <button class="new-round-btn" onclick="newRound()">New Round</button>
+        </div>
+    </div>
+
+    <script>
+        // Themed question-image pairs
+        const votingData = [
+            {
+                question: "Which landscape is more beautiful?",
+                images: [
+                    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which city skyline is more impressive?",
+                images: [
+                    "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which food looks more delicious?",
+                images: [
+                    "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which car looks cooler?",
+                images: [
+                    "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which house would you rather live in?",
+                images: [
+                    "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which animal is cuter?",
+                images: [
+                    "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which coffee looks more appealing?",
+                images: [
+                    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which vacation spot seems more relaxing?",
+                images: [
+                    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1571501679680-de32f1e7aad4?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which flower is more beautiful?",
+                images: [
+                    "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which dessert looks more tempting?",
+                images: [
+                    "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which workspace looks more productive?",
+                images: [
+                    "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which watch looks more stylish?",
+                images: [
+                    "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which sunset is more breathtaking?",
+                images: [
+                    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which phone looks more modern?",
+                images: [
+                    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=400&h=300&fit=crop"
+                ]
+            },
+            {
+                question: "Which book cover is more intriguing?",
+                images: [
+                    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop",
+                    "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop"
+                ]
+            }
+        ];
+
+        // Vote tracking
+        let votes = { left: 0, right: 0 };
+        let hasVoted = false;
+
+        // Initialize the page
+        function init() {
+            loadNewContent();
+        }
+
+        // Load new question and pictures
+        function loadNewContent() {
+            // Reset voting state
+            hasVoted = false;
+            document.getElementById('results').style.display = 'none';
+            
+            // Enable vote buttons
+            const voteButtons = document.querySelectorAll('.vote-btn');
+            voteButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            });
+
+            // Get random themed content
+            const randomData = votingData[Math.floor(Math.random() * votingData.length)];
+            
+            // Set question
+            document.getElementById('question').textContent = randomData.question;
+
+            // Load matching images
+            loadImage('img1', 'placeholder1', randomData.images[0]);
+            loadImage('img2', 'placeholder2', randomData.images[1]);
+        }
+
+        // Load image with fallback
+        function loadImage(imgId, placeholderId, src) {
+            const img = document.getElementById(imgId);
+            const placeholder = document.getElementById(placeholderId);
+            
+            img.onload = function() {
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            
+            img.onerror = function() {
+                placeholder.textContent = 'Image failed to load';
+                placeholder.style.color = '#ff6b6b';
+            };
+            
+            // Reset states
+            img.style.display = 'none';
+            placeholder.style.display = 'block';
+            placeholder.textContent = 'Loading...';
+            placeholder.style.color = '#666';
+            
+            img.src = src;
+        }
+
+        // Handle voting
+        function vote(side) {
+            if (hasVoted) return;
+            
+            hasVoted = true;
+            votes[side]++;
+            
+            // Disable vote buttons
+            const voteButtons = document.querySelectorAll('.vote-btn');
+            voteButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            });
+            
+            // Show results
+            updateResults();
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Update results display
+        function updateResults() {
+            const total = votes.left + votes.right;
+            const leftPercent = total > 0 ? Math.round((votes.left / total) * 100) : 0;
+            const rightPercent = total > 0 ? Math.round((votes.right / total) * 100) : 0;
+            
+            document.getElementById('leftCount').textContent = votes.left;
+            document.getElementById('rightCount').textContent = votes.right;
+            document.getElementById('totalVotes').textContent = total;
+            
+            document.getElementById('leftBar').style.width = leftPercent + '%';
+            document.getElementById('rightBar').style.width = rightPercent + '%';
+            
+            document.getElementById('leftPercent').textContent = leftPercent + '%';
+            document.getElementById('rightPercent').textContent = rightPercent + '%';
+        }
+
+        // Start new round
+        function newRound() {
+            loadNewContent();
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
